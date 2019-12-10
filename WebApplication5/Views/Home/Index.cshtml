@@ -1,0 +1,183 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Courses</title>
+    <link href="~/Scripts/bootstrap.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery.min.js"></script>
+    <scipt src="~/Scripts/jquery.js"></scipt>
+
+
+    <script>
+        $(document).ready(function () {
+            getCourses();
+            $('#edit').hide();
+            $('#add').hide();
+        });
+
+        function getCourses() {
+            $.ajax({
+                type: "post",
+                url: "/Home/GetCourses",
+                success: function (result) {
+                    $("#coursetbody").html(" ");
+                    var html = "";
+                    for (r in result) {
+                        html += '<tr>';
+                        html += '<td>' + result[r].CourseCode + '</td>';
+                        html += '<td>' + result[r].Title + '</td>';
+                        html += '<td> <a href="#" onclick="getById(' + "'" + result[r].CourseCode + "'" + ')">Edit</a> | <a href="#"  onclick="Delele(' + "'" + result[r].CourseCode + "'" + ')">Delete</a></td>';
+                        html += '</tr>';
+                        
+                    }
+                    
+                    $('#coursetbody').html(html);
+                    
+                     
+                   
+                },
+                error: function (result) {
+                    alert("Error");
+                }
+            })
+        }
+        function showForm()
+        {
+            $('#add').show();
+           
+        }
+        function addCourse(form) {
+            $.ajax({
+                type: "post",
+                url: "/Home/AddCourse",
+                data: $(form).serialize(),
+                success: function (result) {
+                    getCourses();
+                     $('#add').hide();
+                },
+                error: function (result) {
+                    alert("Error");
+                }
+            })
+            return false;
+        }
+        function Delele(courseCodeValue) {
+
+            var ans = confirm("Are you sure you want to delete this Record?" + courseCodeValue);
+
+            var data = { CourseCode: courseCodeValue };
+            if (ans) {
+                $.ajax({
+                    type: "post",
+                    url: "/Home/Delete/",
+                    data: JSON.stringify(data),
+                    contentType: "application/json",
+                    dataType: "json",
+                    success: function (result) {
+                        getCourses();
+
+                    },
+                    error: function (errormessage) {
+                        alert(errormessage.responseText);
+                    }
+                });
+            }
+        }
+
+        function getById(courseCodeValue) {
+
+            var ans = confirm("Are you sure you want to Edit this Record?" + courseCodeValue);
+
+            var data = { CourseCode: courseCodeValue };
+            if (ans) {
+                $.ajax({
+                    type: "post",
+                    url: "/Home/getById/",
+                    data: JSON.stringify(data),
+                    contentType: "application/json",
+                    dataType: "json",
+                    success: function (result) {
+                        $('#edit').show();
+                        $('#title').val(result.Title);
+                        $('#coursecode').val(result.CourseCode);
+                    },
+                    error: function (errormessage) {
+                        alert(errormessage.responseText);
+                    }
+                });
+            }
+        }
+          function Update(form) {
+            $.ajax({
+                type: "post",
+                url: "/Home/Update",
+                data: $(form).serialize(),
+                success: function (result) {
+                      $('#edit').hide();
+                    getCourses();
+
+                },
+                error: function (result) {
+                    alert("Error");
+                }
+            })
+            return false;
+        }
+
+    </script>
+
+
+</head>
+<body>
+
+
+
+
+    <div class="container">
+        <label> Courses Data</label>
+        <table class="table table-hover table-primary">
+            <thead>
+                <tr><th>Course Code</th><th>Title</th></tr>
+            </thead>
+            <tbody id="coursetbody"></tbody>
+        </table>
+    
+       <button class="btn-link" onclick="showForm()">Add Course</button>
+   
+
+        <form method="post" onsubmit="return addCourse(this)" id="add">
+            <div class="form-group">
+                <label>Add Course Code</label>
+                <input name="CourseCode" type="text" class="form-control" placeholder="Course Code" />
+            </div>
+            <div class="form-group">
+                <label>Title</label>
+                <input name="Title" type="text" class="form-control" placeholder="Title" />
+            </div>
+            <button class="btn btn-primary" type="submit">Save  into list</button>
+        </form>
+
+        <form method="post" onsubmit="return Update(this)" id="edit">
+
+            <div class="form-group">
+                <label>Course Code</label>
+                <input name="CourseCode" type="text" id="coursecode" class="form-control" placeholder="CourseCode" />
+            </div>
+            <div class="form-group">
+                <label>Title</label>
+                <input name="Title" type="text" id="title" class="form-control" placeholder="Title" />
+            </div>
+            <button class="btn btn-primary" type="submit">Update into List</button>
+        </form>
+        <hr />
+
+
+    </div>
+</body>
+</html>
